@@ -1,0 +1,16 @@
+sequenceDiagram
+    loop
+        autonumber
+        Sender MTA->>relay.firefox.com: To: abc123@relay.firefox.com <br> Reply-To: replies@sender.com <br> Message-Id: 123
+        rect rgb(192, 192, 192)
+            relay.firefox.com->>relay.firefox.com: get_or_create(To=abc123@relay.firefox.com,Reply-To=replies@sender.com) <br> reply456@relay.firefox.com, realuser@mail.com
+            relay.firefox.com->>Receiver MTA: To: realuser@mail.com <br> Reply-To: reply456@relay.firefox.com <br> Message-Id: 456
+            relay.firefox.com->>relay.firefox.com: Store: <br> (inbound_Message-Id: 123, outbound_Message-Id: 456)
+        end
+        Receiver MTA->>relay.firefox.com: To: reply456@relay.firefox.com <br> In-Reply-To: 456 <br> Message-Id: 789
+        rect rgb(192, 192, 192)
+            relay.firefox.com->>relay.firefox.com: get(To: reply456@relay.firefox.com) = replies@sender.com, abc123@relay.firefox.com <br> get(In-Reply-To: 456) = Message-Id: 123
+            relay.firefox.com->>Sender MTA: To: replies@sender.com <br> From: abc123@relay.firefox.com <br> Reply-To: abc123@relay.firefox.com <br> Message-Id: ABC <br> In-Reply-To: 123
+            relay.firefox.com->>relay.firefox.com: Store: <br> (inbound_Message-Id: 789, outbound_Message-Id: ABC)
+        end
+    end
